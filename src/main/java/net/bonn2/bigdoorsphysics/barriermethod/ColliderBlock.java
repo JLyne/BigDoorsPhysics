@@ -3,7 +3,7 @@ package net.bonn2.bigdoorsphysics.barriermethod;
 import net.bonn2.bigdoorsphysics.util.Config;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.data.BlockData;
+import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.util.BoundingBox;
 
@@ -14,7 +14,7 @@ import static net.bonn2.bigdoorsphysics.BigDoorsPhysics.PLUGIN;
 public class ColliderBlock {
     public final Location location;
     public final Location direction;
-    private BlockData oldBlock;
+    private BlockState oldBlock;
 
     /**
      * @param location The position to place the block
@@ -27,7 +27,7 @@ public class ColliderBlock {
     }
 
     public void place() {
-        oldBlock = location.getWorld().getBlockAt(location).getBlockData();
+        oldBlock = location.getWorld().getBlockAt(location).getState();
         if (location.getWorld().getBlockAt(location).getType().isSolid()) return;
         location.getWorld().getBlockAt(location).setBlockData(Material.BARRIER.createBlockData());
         if (Config.hideBarriers()) {
@@ -58,7 +58,9 @@ public class ColliderBlock {
     }
 
     public void remove() {
-        if (location.getBlock().getType() == Material.BARRIER && !oldBlock.getMaterial().isSolid())
-            location.getWorld().getBlockAt(location).setBlockData(oldBlock);
+        if (location.getBlock().getType() == Material.BARRIER && !oldBlock.getType().isSolid()) {
+            location.getWorld().getBlockAt(location).setBlockData(oldBlock.getBlockData());
+            oldBlock.update();
+        }
     }
 }
